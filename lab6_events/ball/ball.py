@@ -24,6 +24,15 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
+def explode():
+    bomb_0 = pygame.image.load('bomb.png')
+    for i in range(0, 60, 1):
+        bomb = pygame.transform.scale(bomb_0, (i * 10, i * 10))
+        screen.blit(bomb, (screen_width / 2 - i * 5, screen_height / 2 - i * 5))
+        pygame.display.update()
+        clock.tick(FPS)
+
+
 def lose():
     global balls, time, score, missed
     output = open('Scores', 'a')
@@ -99,7 +108,14 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            click = event.pos
+            if event.button == 3:
+                explode()
+                score += len(balls)
+                balls.clear()
+                new_balls.clear()
+                pygame.draw.rect(screen, background_color, (0, 105, screen_width, screen_height - 105))
+            else:
+                click = event.pos
 
     if (time % 180 == 0):
         balls.append( ball(
