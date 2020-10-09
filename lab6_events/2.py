@@ -74,7 +74,7 @@ class ball():
         if (s <= self.r ** 2):
             self.alive = False
 
-    def death (self):
+    def kill (self):
         pygame.draw.circle(screen, background_color, (self.x, self.y), self.r)
 
 
@@ -122,7 +122,7 @@ while not finished:
         if (ball_i.alive == True):
             new_balls.append(ball_i)
         else:
-            ball_i.death()
+            ball_i.kill()
             score += 1
 
     if ((miss == True) and not (click == (0, 0))):
