@@ -24,6 +24,23 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
+def update_score(score, nickname):
+    with open('Scores') as file:
+        top_list = file.readlines()
+    top_scores = []
+    for player in top_list:
+        tmp = player.split()
+        tmp[0] = int(tmp[0])
+        top_scores.append(tmp)
+    top_scores.append([int(score), nickname])
+    top_scores.sort()
+    output = open('Scores', 'w')
+    for i in range(0, 10, 1):
+        output.write(f"{top_scores[i][0]} {top_scores[i][1]}\n")
+    output.close()
+
+
+
 def explode():
     bomb_0 = pygame.image.load('bomb.png')
     for i in range(0, 60, 1):
@@ -35,10 +52,8 @@ def explode():
 
 def lose():
     global balls, time, score, missed
-    output = open('Scores', 'a')
     nickname = input('Your nickname: ')
-    output.write(f'{nickname} {score}\n')
-    output.close()
+    update_score(score, nickname)
     balls = []
     time = -dt
     score = 0
@@ -146,11 +161,11 @@ while not finished:
 
     balls = new_balls
 
-    pygame.draw.rect(screen, background_color, (200, 10, 250, 60))
+    pygame.draw.rect(screen, background_color, (0, 0, 250, 60))
     score_string = font.render("Score: " + str(score), 1, (0, 0, 0))
     screen.blit(score_string, (0,0))
 
-    pygame.draw.rect(screen, background_color, (200 + screen_width / 2, 10, 250 + screen_width / 2, 60))
+    pygame.draw.rect(screen, background_color, (screen_width / 2, 0, 250 + screen_width / 2, 60))
     missed_string = font.render("Missed: " + str(missed), 1, (0, 0, 0))
     screen.blit(missed_string, (screen_width / 2, 0))
 
