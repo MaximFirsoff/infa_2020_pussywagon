@@ -35,7 +35,7 @@ def update_score(score, nickname):
     top_scores.append([int(score), nickname])
     top_scores.sort()
     output = open('Scores', 'w')
-    for i in range(0, 10, 1):
+    for i in range(len(top_scores) - 10, len(top_scores), 1):
         output.write(f"{top_scores[i][0]} {top_scores[i][1]}\n")
     output.close()
 
