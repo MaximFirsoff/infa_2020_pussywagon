@@ -11,6 +11,7 @@ FPS = 60
 
 font = pygame.font.SysFont('timesnewromanboldttf', 72)
 window = pygame.display.set_mode((window_width, window_height))
+pygame.display.set_caption('Galaxy game')
 background = pygame.image.load('images/background.jpg')
 background = pygame.transform.scale(background, (window_width, window_height))
 
