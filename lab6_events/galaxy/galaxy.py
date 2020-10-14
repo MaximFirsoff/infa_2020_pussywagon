@@ -107,7 +107,7 @@ while playing:
     clock.tick(FPS)
     time += dt
     new_planets = []
-    click = (0, 0)
+    click = (-1000, -1000)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -139,7 +139,7 @@ while playing:
         else:
             score += planet_i.score
 
-    if ((miss == True) and not (click == (0, 0))):
+    if ((miss == True) and not (click == (-1000, -1000))):
         missed += 1
 
     planets = new_planets
