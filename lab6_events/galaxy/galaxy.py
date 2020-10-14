@@ -1,6 +1,6 @@
 import pygame
 from random import randint
-import numpy as np
+
 pygame.init()
 
 dt = 1
@@ -9,7 +9,9 @@ window_width = 1366
 window_height = 768
 FPS = 60
 
-font = pygame.font.SysFont('timesnewromanboldttf', 72)
+WHITE = (255, 255, 255)
+
+font = pygame.font.SysFont('comicsans', 72)
 window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption('Galaxy game')
 background = pygame.image.load('images/background.jpg')
@@ -34,9 +36,8 @@ def update_score(score, nickname):
 
 
 def explode():
-    bomb_0 = pygame.image.load('bomb.png')
     for i in range(0, 60, 1):
-        bomb = pygame.transform.scale(bomb_0, (i * 10, i * 10))
+        bomb = pygame.transform.scale(pygame.image.load('images/bomb.png'), (i * 10, i * 10))
         window.blit(bomb, (window_width / 2 - i * 5, window_height / 2 - i * 5))
         pygame.display.update()
         clock.tick(FPS)
@@ -54,18 +55,18 @@ def lose():
     pygame.draw.line(window, (0, 0, 0), (0, 100), (window_width, 100), 5)
 
 
-class planet():
+class Planet():
 
-    def __init__ (self, x, y, r, form, vx, vy, alive = True, time = 0):
-        self.x = x
-        self.y = y
-        self.vx = vx
-        self.vy = vy
+    def __init__ (self, alive = True, time = 0):
+        self.x = randint(100, window_width - 100)
+        self.y = randint(205, window_height - 100)
+        self.vx = randint(-10,10)
+        self.vy = randint(-10,10)
         self.alive = alive
         self.time = time
-        self.r = r
-        self.form = pygame.image.load(f"images/planet{form}.png")
-        self.score = (160 - r) // 10 + max(self.vx, self.vy)
+        self.r = randint(50,150)
+        self.form = pygame.image.load(f"images/planet{randint(3,20)}.png")
+        self.score = (160 - self.r) // 10 + max(abs(self.vx), abs(self.vy))
 
     def update (self):
         self.x += self.vx * dt
@@ -87,25 +88,17 @@ class planet():
         if (s <= self.r ** 2):
             self.alive = False
 
-def rand_planet():
-    return planet(
-                randint(100, window_width - 100),
-                randint(205, window_height - 100),
-                randint(50,150),
-                randint(3,20),
-                randint(1,10),
-                randint(1,10),
-                )
+
 
 pygame.display.update()
 clock = pygame.time.Clock()
-finished = False
+playing = True
 planets = []
 time = -dt
 score = 0
 missed = 0
 
-while not finished:
+while playing:
 
     window.blit(background, (0, 0))
     miss = True
@@ -117,11 +110,12 @@ while not finished:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            finished = True
+            playing = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 3:
                 explode()
-                score += len(planets)
+                for planet in planets:
+                    score += planet.score
                 planets.clear()
                 new_planets.clear()
                 window.blit(background, (0, 0))
@@ -129,7 +123,7 @@ while not finished:
                 click = event.pos
 
     if (time % 180 == 0):
-        planets.append(rand_planet())
+        planets.append(Planet())
     for planet_i in planets:
         planet_i.update()
         planet_i.live(click)
@@ -149,10 +143,10 @@ while not finished:
 
     planets = new_planets
 
-    score_string = font.render("Score: " + str(score), 1, (255, 255, 255))
+    score_string = font.render("Score: " + str(score), 1, WHITE)
     window.blit(score_string, (0,0))
 
-    missed_string = font.render("Missed: " + str(missed), 1, (255, 255, 255))
+    missed_string = font.render("Missed: " + str(missed), 1, WHITE)
     window.blit(missed_string, (window_width / 2, 0))
 
     if (missed == 100):
