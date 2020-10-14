@@ -37,7 +37,8 @@ def update_score(score, nickname):
 
 def explode():
     for i in range(0, 60, 1):
-        bomb = pygame.transform.scale(pygame.image.load('images/bomb.png'), (i * 10, i * 10))
+        bomb = pygame.transform.scale(pygame.image.load('images/bomb.png'),
+                                      (i * 10, i * 10) )
         window.blit(bomb, (window_width / 2 - i * 5, window_height / 2 - i * 5))
         pygame.display.update()
         clock.tick(FPS)
