@@ -1,24 +1,19 @@
+import random
 import pygame
-import sys
-import pygame.draw
-import os
 import math
 import time
-import random
-
-FPS = 60
-
-screen_width = 1000
-screen_height = 850
+import os
+pygame.font.init()
 pygame.init()
-screen = pygame.display.set_mode((screen_width, screen_height))
-black = (0, 0, 0)
-white = (255, 255, 255)
-hero_size = {'x': 10, 'y': 10}
-hero_velocity = 350
-mouse_pos = {'x':  screen_width/2,'y': screen_height/2}
-mouse_impact = 0.2
 
+WIDTH = 1000
+HEIGHT = 1000
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background.jpg")), (WIDTH, HEIGHT))
+PLAYER_0 = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Player", "Poses", "player_stand.png"))
+PLAYER_1 = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Player", "Poses", "player_walk1.png"))
+PLAYER_2 = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Player", "Poses", "player_walk2.png"))
 BULLET_RED = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
 BULLET_GREEN = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
 BULLET_YELLOW = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
@@ -29,113 +24,39 @@ COLOR_MAP = {
             "blue": BULLET_BLUE,
             "yellow": BULLET_YELLOW,
 }
-
-class all_map():
-    def __init__(self, objects):
-        """ Конструктор класса all_map
-        придает всем объектам нна карте класс all_map, чтобы их можно
-        было все одновременно двигать, не двигая персоннажа
-        Args:
-        objects - объект класса all_map
-        """
-        self.objects = objects
-        self.color = black
-
-    def render(self):
-        screen.fill(white)
-        for object in self.objects:
-            object.draw()
-
-    def forward(self, axis_x, axis_y):
-        #функция движения всей карты вперед
-        t = True
-        for object in self.objects:
-            t = t and not (object.x + object.width >= hero.x and object.x <= hero.x and object.y + object.height * 0.4 >= hero.y and object.y <= hero.y + 9)
-        for object in self.objects:
-            if t:
-                if axis_y == 1:
-                    object.y -= hero_velocity / FPS / (2**0.5)
-                else:
-                    object.y -= hero_velocity / FPS
-            else:
-                pass
-
-    def backward(self, axis_x, axis_y):
-        #функция движения всей карты вниз
-        t = True
-        for object in self.objects:
-            t = t and not (object.x + object.width >= hero.x and object.x  <= hero.x and object.y+ object.height >= hero.y - 9 and object.y + object.height * 0.6 <= hero.y)
-        for object in self.objects:
-            if t:
-                if axis_y == 1:
-                    object.y += hero_velocity / FPS / (2**0.5)
-                else:
-                    object.y += hero_velocity / FPS
-            else:
-                pass
-
-    def left(self, axis_x, axis_y):
-        #функция движения всей карты влево
-        t = True
-        for object in self.objects:
-            t = t and not (object.x <= hero.x + 9 and object.x + object.width * 0.4 >= hero.x and object.y <= hero.y and object.y  + object.height >= hero.y)
-        for object in self.objects:
-            if t:
-                if axis_x == 1:
-                    object.x -= hero_velocity / FPS / (2**0.5)
-                else:
-                    object.x -= hero_velocity / FPS
-            else:
-                pass
-
-    def right(self, axis_x, axis_y):
-        #функция движения всей карты вправо
-        t = True
-        for object in self.objects:
-            t = t and not (object.x+ object.width * 0.6 <= hero.x and object.x  + object.width >= hero.x - 9 and object.y <= hero.y and object.y  + object.height >= hero.y)
-        for object in self.objects:
-            if t:
-                if axis_x == 1:
-                    object.x += hero_velocity / FPS / (2**0.5)
-                else:
-                    object.x += hero_velocity / FPS
-            else:
-                pass
-
-
-class Wall():
-    def __init__(self, x, y, width, height):
-        """ Конструктор класса wall
-        Args:
-        x - положение стены по горизонтали
-        y - положение стены по вертикали
-        width - длина
-        height - высота
-        """
+ZOMBIE = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Zombie", "Poses", "zombie_stand.png"))
+class Player:
+    def __init__(self, x, y, speed = 5):
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
-        self.color = black
+        self.speed = speed
+        self.img_0 = PLAYER_0
+        self.time = 0
+        self.img = PLAYER_0
+        self.cooldown = 0
 
     def draw(self):
-        #функция рисования стены на карте
-        pygame.draw.rect(screen, black, (self.x - mouse_pos['x'] * mouse_impact, self.y - mouse_pos['y'] * mouse_impact, self.width, self.height))
+        window.blit(self.img, (self.x, self.y))
+        self.mask = pygame.mask.from_surface(self.img)
 
-
-class Hero():
-    def __init__(self):
-        """ Конструктор класса hero
-        """
-        self.color = black
-        self.x = screen_width/2
-        self.y = screen_height/2
-
-    def draw(self):
-        #функция рисования героя на карте
-        pygame.draw.rect(screen, black, (self.x*(1 + mouse_impact) - mouse_pos['x'] * mouse_impact - hero_size['x'] / 2, self.y*(1 + mouse_impact) -  hero_size['y'] / 2 - mouse_pos['y'] * mouse_impact, 10, 10))
-
-
+    def move(self, direction):
+        if direction == "UP":
+            self.img = pygame.transform.rotate(self.img_0, 0)
+            self.y -= self.speed
+        if direction == "DOWN":
+            self.img = pygame.transform.rotate(self.img_0, 180)
+            self.y += self.speed
+        if direction == "RIGHT":
+            self.img = pygame.transform.rotate(self.img_0, -90)
+            self.x += self.speed
+        if direction == "LEFT":
+            self.img = pygame.transform.rotate(self.img_0, 90)
+            self.x -= self.speed
+    def moving(self):
+        if (self.time // 5) % 2 == 1:
+            self.img_0 = PLAYER_1
+        else:
+            self.img_0 = PLAYER_2
 
 class Bullet():
     def __init__ (self, x, y, cos, sin, angle, color, speed = 20):
@@ -153,68 +74,112 @@ class Bullet():
 
     def draw(self):
         self.img = pygame.transform.rotate(self.type, self.angle)
-        screen.blit(self.img, (self.x - mouse_pos['x'] * mouse_impact, self.y - mouse_pos['y'] * mouse_impact))
+        window.blit(self.img, (self.x, self.y))
 
-hero = Hero()
-walls = [Wall(200, 200, 600, 16), Wall(200, 200, 16, 200), Wall(200, 400, 200, 16), Wall(800, 200, 16, 200), Wall(440, 400, 376, 16)]
-mymap = all_map(walls)
-bullets = []
+class Enemy():
 
-pygame.display.update()
-clock = pygame.time.Clock()
+    def __init__ (self):
+        self.x = random.randint(100, WIDTH - 100)
+        self.y = random.randint(205, HEIGHT - 100)
+        self.alive = True
+        self.img = ZOMBIE
+        self.r = 20
 
-flag = {'forward': 0, 'backward': 0, 'left': 0, 'right': 0, 'space' : 0}
-scripts = {'forward': mymap.forward, 'backward': mymap.backward, 'left': mymap.left, 'right': mymap.right}
-buttons = {'forward': pygame.K_s, 'backward': pygame.K_w, 'left': pygame.K_d, 'right': pygame.K_a, 'space': pygame.K_SPACE,}
-axis = {'Ox': 0, 'Oy': 0}
+    def update (self):
+        self.x += random.randint(-10,10)
+        self.y += random.randint(-10,10)
+
+    def draw(self):
+        window.blit(self.img, (self.x, self.y))
+
+    def live (self, bullet):
+        s = (bullet.x - self.x) ** 2 + (bullet.y - self.y) ** 2
+        if (s <= self.r ** 2):
+            self.alive = False
+
+def main():
+    run = True
+    FPS = 60
+    clock = pygame.time.Clock()
+    score = 0
+    lives = 5
+    main_font = pygame.font.SysFont("comicsans", 50)
+    player = Player(WIDTH/2, HEIGHT/2)
+    bullets = []
+    new_bullets = []
+    enemies = []
+    new_enemies = []
+    time = 0
+    def redraw_window():
+        window.blit(BG, (0,0))
+        #draw statistics
+        lives_label = main_font.render(f"Lives: {lives}", 1, (255,255,255))
+        score_label = main_font.render(f"Score: {score}", 1, (255,255,255))
+        window.blit(lives_label, (10,10))
+        window.blit(score_label, (WIDTH - 10 - score_label.get_width(), 10))
+        player.draw()
+        for bullet in bullets:
+            bullet.draw()
+        for enemy in new_enemies:
+            enemy.draw()
+        pygame.display.update()
+
+    while run:
+        clock.tick(FPS)
+        time += 1
+        if player.cooldown > 0:
+            player.cooldown -= 1
+        player.time += 1
+        bullets = new_bullets
+        new_bullets = []
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        # SHIP AND BULLETS
+        player.img = PLAYER_0
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            player.moving()
+            player.move("UP")
+        if keys[pygame.K_a]:
+            player.moving()
+            player.move("LEFT")
+        if keys[pygame.K_s]:
+            player.moving()
+            player.move("DOWN")
+        if keys[pygame.K_d]:
+            player.moving()
+            player.move("RIGHT")
+        mouse = pygame.mouse.get_pressed()
+        if mouse[0]:
+            if player.cooldown == 0:
+                (x, y) = pygame.mouse.get_pos()
+                if x-player.x == 0:
+                    x = player.x + 1
+                angle = math.atan ((y - player.y) / (x - player.x))
+                sin = (x - player.x) / math.sqrt( (x - player.x) ** 2 + (y - player.y) ** 2 )
+                cos = (y - player.y) / math.sqrt( (x - player.x) ** 2 + (y - player.y) ** 2 )
+                bullets.append(Bullet(player.x, player.y, cos, sin, angle, random.choice(["red", "yellow", "blue", "green"])))
+                player.cooldown = 10
+        for bullet in bullets:
+            bullet.move()
+            if (0 < bullet.x < WIDTH) and (0 < bullet.y < HEIGHT):
+                new_bullets.append(bullet)
+
+        # ENEMIES
+        enemies = new_enemies
+        new_enemies = []
+        if (time % 180 == 0):
+            enemies.append(Enemy())
+        for enemy in enemies:
+            enemy.update()
+        for enemy in enemies:
+            for bullet in bullets:
+                enemy.live(bullet)
+            if (enemy.alive == True):
+                new_enemies.append(enemy)
 
 
+        redraw_window()
 
-while 1:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-        if event.type == pygame.KEYDOWN:
-            for key in buttons:
-                if event.key == buttons[key]:
-                    flag[key] = 1
-                    if (flag['left'] == 1 or flag['right'] == 1) and flag['left'] != flag['right']:
-                        axis['Oy'] = 1
-                    if (flag['forward'] == 1 or flag['backward'] == 1) and flag['forward'] != flag['backward']:
-                        axis['Ox'] = 1
-
-
-        if event.type == pygame.MOUSEMOTION:
-            mouse_pos['x'], mouse_pos['y'] = event.pos
-
-        if event.type == pygame.KEYUP:
-            for key in buttons:
-                if event.key == buttons[key]:
-                    flag[key] = 0
-                    if (flag['left'] != 1 and flag['right'] != 1) or flag['left'] == flag['right']:
-                        axis['Oy'] = 0
-                    if (flag['forward'] != 1 and flag['backward'] != 1) or flag['forward'] == flag['backward']:
-                        axis['Ox'] = 0
-
-
-    for key in flag:
-        if flag[key] and (key == 'forward' or key == 'backward' or key == 'right' or key == 'left'):
-            scripts[key](axis['Ox'], axis['Oy'])
-
-    if flag['space'] == 1:
-        angle = math.atan ((mouse_pos['y'] - hero.y) / (mouse_pos['x'] - hero.x))
-        sin = (mouse_pos['x'] - hero.x) / math.sqrt( (mouse_pos['x'] - hero.x) ** 2 + (mouse_pos['y'] - hero.y) ** 2 )
-        cos = (mouse_pos['y'] - hero.y) / math.sqrt( (mouse_pos['x'] - hero.x) ** 2 + (mouse_pos['y'] - hero.y) ** 2 )
-        bullets.append(Bullet(hero.x*(1 + mouse_impact) - mouse_pos['x'] * mouse_impact - hero_size['x'] / 2, hero.y*(1 + mouse_impact) -  hero_size['y'] / 2 - mouse_pos['y'] * mouse_impact, cos, sin, angle, random.choice(["red", "yellow", "blue", "green"])))
-
-
-
-    mymap.render()
-    hero.draw()
-    for bullet in bullets:
-        bullet.move()
-        bullet.draw()
-    pygame.display.update()
+main()
