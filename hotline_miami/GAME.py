@@ -66,29 +66,33 @@ class Player:
 
     def move(self, direction, background, enemies):
         if direction == "UP":
-            self.img = pygame.transform.rotate(self.img_0, 0)
-            if background.y <= 0 and self.y == HEIGHT/2:
-                background.move(direction, enemies)
-            else:
-                self.y -= self.speed
+            if self.y > 0:
+                self.img = pygame.transform.rotate(self.img_0, 0)
+                if background.y <= 0 and self.y == HEIGHT/2:
+                    background.move(direction, enemies)
+                else:
+                    self.y -= self.speed
         if direction == "DOWN":
-            self.img = pygame.transform.rotate(self.img_0, 180)
-            if background.y >= -HEIGHT and self.y == HEIGHT/2:
-                background.move(direction, enemies)
-            else:
-                self.y += self.speed
+            if self.y < HEIGHT:
+                self.img = pygame.transform.rotate(self.img_0, 180)
+                if background.y >= -HEIGHT and self.y == HEIGHT/2:
+                    background.move(direction, enemies)
+                else:
+                    self.y += self.speed
         if direction == "RIGHT":
-            self.img = pygame.transform.rotate(self.img_0, -90)
-            if background.x >= -WIDTH and self.x == WIDTH/2:
-                background.move(direction, enemies)
-            else:
-                self.x += self.speed
+            if self.x < WIDTH:
+                self.img = pygame.transform.rotate(self.img_0, -90)
+                if background.x >= -WIDTH and self.x == WIDTH/2:
+                    background.move(direction, enemies)
+                else:
+                    self.x += self.speed
         if direction == "LEFT":
-            self.img = pygame.transform.rotate(self.img_0, 90)
-            if background.x <= 0 and self.x == WIDTH/2:
-                background.move(direction, enemies)
-            else:
-                self.x -= self.speed
+            if self.x > 0:
+                self.img = pygame.transform.rotate(self.img_0, 90)
+                if background.x <= 0 and self.x == WIDTH/2:
+                    background.move(direction, enemies)
+                else:
+                    self.x -= self.speed
     def moving(self):
         if (self.time // 5) % 2 == 1:
             self.img_0 = PLAYER_1
