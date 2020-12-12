@@ -70,12 +70,12 @@ class Bullet():
 
 class Planet():
 
-    def __init__ (self, alive = True):
+    def __init__ (self):
         self.x = random.randint(100, WIDTH - 100)
         self.y = random.randint(205, HEIGHT - 100)
         self.vx = random.randint(-10,10)
         self.vy = random.randint(-10,10)
-        self.alive = alive
+        self.alive = True
         self.r = random.randint(50,150)
         self.form = pygame.image.load(os.path.join("images", f"planet{random.randint(3,20)}.png"))
         self.score = (160 - self.r) // 10 + max(abs(self.vx), abs(self.vy))
@@ -164,9 +164,9 @@ def main():
             planets.append(Planet())
         for planet in planets:
             planet.update()
-            for planet in planets:
-                for bullet in bullets:
-                    planet.live(bullet)
+        for planet in planets:
+            for bullet in bullets:
+                planet.live(bullet)
             if (planet.alive == True):
                 new_planets.append(planet)
             else:
