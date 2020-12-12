@@ -10,7 +10,7 @@ WIDTH = 1000
 HEIGHT = 1000
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background.jpg")), (WIDTH, HEIGHT))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background.jpg")), (2*WIDTH, 2*HEIGHT))
 PLAYER_0 = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Player", "Poses", "player_stand.png"))
 PLAYER_1 = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Player", "Poses", "player_walk1.png"))
 PLAYER_2 = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Player", "Poses", "player_walk2.png"))
@@ -25,6 +25,31 @@ COLOR_MAP = {
             "yellow": BULLET_YELLOW,
 }
 ZOMBIE = pygame.image.load(os.path.join("kenney_platformercharacters", "PNG", "Zombie", "Poses", "zombie_stand.png"))
+
+class Background:
+    def __init__(self, img):
+        self.img = img
+        self.x = 0
+        self.y = 0
+        self.speed = 5
+    def move(self, direction, enemies):
+        if direction == "UP":
+            self.y += self.speed
+            for enemy in enemies:
+                enemy.y += self.speed
+        if direction == "DOWN":
+            self.y -= self.speed
+            for enemy in enemies:
+                enemy.y -= self.speed
+        if direction == "RIGHT":
+            self.x -= self.speed
+            for enemy in enemies:
+                enemy.x -= self.speed
+        if direction == "LEFT":
+            self.x += self.speed
+            for enemy in enemies:
+                enemy.x += self.speed
+
 class Player:
     def __init__(self, x, y, speed = 5):
         self.x = x
@@ -39,19 +64,31 @@ class Player:
         window.blit(self.img, (self.x, self.y))
         self.mask = pygame.mask.from_surface(self.img)
 
-    def move(self, direction):
+    def move(self, direction, background, enemies):
         if direction == "UP":
             self.img = pygame.transform.rotate(self.img_0, 0)
-            self.y -= self.speed
+            if background.y <= 0 and self.y == HEIGHT/2:
+                background.move(direction, enemies)
+            else:
+                self.y -= self.speed
         if direction == "DOWN":
             self.img = pygame.transform.rotate(self.img_0, 180)
-            self.y += self.speed
+            if background.y >= -HEIGHT and self.y == HEIGHT/2:
+                background.move(direction, enemies)
+            else:
+                self.y += self.speed
         if direction == "RIGHT":
             self.img = pygame.transform.rotate(self.img_0, -90)
-            self.x += self.speed
+            if background.x >= -WIDTH and self.x == WIDTH/2:
+                background.move(direction, enemies)
+            else:
+                self.x += self.speed
         if direction == "LEFT":
             self.img = pygame.transform.rotate(self.img_0, 90)
-            self.x -= self.speed
+            if background.x <= 0 and self.x == WIDTH/2:
+                background.move(direction, enemies)
+            else:
+                self.x -= self.speed
     def moving(self):
         if (self.time // 5) % 2 == 1:
             self.img_0 = PLAYER_1
@@ -105,13 +142,14 @@ def main():
     lives = 5
     main_font = pygame.font.SysFont("comicsans", 50)
     player = Player(WIDTH/2, HEIGHT/2)
+    background = Background(BG)
     bullets = []
     new_bullets = []
     enemies = []
     new_enemies = []
     time = 0
     def redraw_window():
-        window.blit(BG, (0,0))
+        window.blit(background.img, (background.x, background.y))
         #draw statistics
         lives_label = main_font.render(f"Lives: {lives}", 1, (255,255,255))
         score_label = main_font.render(f"Score: {score}", 1, (255,255,255))
@@ -140,16 +178,16 @@ def main():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             player.moving()
-            player.move("UP")
+            player.move("UP", background, enemies)
         if keys[pygame.K_a]:
             player.moving()
-            player.move("LEFT")
+            player.move("LEFT", background, enemies)
         if keys[pygame.K_s]:
             player.moving()
-            player.move("DOWN")
+            player.move("DOWN", background, enemies)
         if keys[pygame.K_d]:
             player.moving()
-            player.move("RIGHT")
+            player.move("RIGHT", background, enemies)
         mouse = pygame.mouse.get_pressed()
         if mouse[0]:
             if player.cooldown == 0:
