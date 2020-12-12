@@ -49,6 +49,8 @@ class Ship:
             self.x -= self.speed * math.cos(pi_angle)
             self.y += self.speed * math.sin(pi_angle)
 
+
+
 class Bullet():
     def __init__ (self, x, y, angle, color, speed = 20):
         self.x = x
